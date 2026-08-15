@@ -41,7 +41,7 @@ export default defineComponent({
     ...rendererProps<ControlElement>(),
   },
   setup(props: RendererProps<ControlElement>) {
-    return useQuasarControl(useJsonFormsControl(props), (value: string) => value || undefined, 300)
+    return useQuasarControl(useJsonFormsControl(props), (value: string) => value, 300)
   },
   methods: {},
 })

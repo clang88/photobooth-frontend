@@ -15,7 +15,7 @@
       use-input
       hide-selected
       fill-input
-      input-debounce="0"
+      input-debounce="100"
       :options="filteredOptions"
       @filter="filterFn"
       @filter-abort="abortFilterFn"
@@ -51,7 +51,7 @@ export default defineComponent({
   setup(props: RendererProps<ControlElement>) {
     const availableOptions = ref<string[]>([])
     const filteredOptions = ref<string[]>([])
-    const useControl = useQuasarControl(useJsonFormsControl(props), (value: any) => value || undefined, 300)
+    const useControl = useQuasarControl(useJsonFormsControl(props), (value: any) => value, 300)
     const schema = useControl.control.value.schema
 
     if (!hasListApi(schema)) {
