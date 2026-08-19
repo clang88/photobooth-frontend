@@ -20,7 +20,6 @@
       style="object-fit: contain; max-width: 100%; max-height: 100%"
       loop
       playsinline
-      :controls="item.media_type === 'video'"
       controlslist="nofullscreen nodownload noremoteplayback noplaybackrate"
       disablepictureinpicture
     ></video>
