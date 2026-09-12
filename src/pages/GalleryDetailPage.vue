@@ -37,12 +37,17 @@
       <q-page-container class="q-pa-none galleryimagedetail full-height">
         <q-page class="full-height">
           <template v-if="itemPresenterMode">
-            <MediaItemPreviewViewer :item="currentMediaitem" style="user-select: none" />
+            <MediaItemPreviewViewer
+              :item="currentMediaitem"
+              :is-applying-long-running-filter="isApplyingLongRunningFilter"
+              style="user-select: none"
+            />
           </template>
           <template v-else>
             <PageCarouselView
               :mediaitem-id="currentMediaitem.id"
               :sliced-images="mediacollectionStore.collection"
+              :is-applying-long-running-filter="isApplyingLongRunningFilter"
               @trigger-changed-item="onCarouselTransition"
             />
           </template>
@@ -145,6 +150,8 @@ const displayIndeterminateProgressbar = ref(false)
 const showDialogShareActionWithParameters = ref(false)
 const shareActionWithParametersConfigIndex = ref(0)
 const available_filter = ref([])
+const long_running_filters = ref<string[]>([])
+const isApplyingLongRunningFilter = ref<boolean>(false)
 const qrShareUrls = ref([])
 const props = defineProps<{
   startTimer: boolean
@@ -154,6 +161,7 @@ const props = defineProps<{
 onBeforeMount(() => {
   selectedMediaitemId.value = route.params.id as string
   getAvailableFilter()
+  getLongRunningFilters()
 })
 watch(route, to => {
   selectedMediaitemId.value = to.params.id as string
@@ -242,11 +250,30 @@ const getAvailableFilter = async () => {
     console.warn(error)
   }
 }
+const getLongRunningFilters = async () => {
+  try {
+    const response = await _fetch('/api/filter/long_running')
+
+    long_running_filters.value = await response.json()
+  } catch (error) {
+    console.warn(error)
+  }
+}
+watch(
+  () => currentMediaitem.value?.revision,
+  () => {
+    isApplyingLongRunningFilter.value = false
+  }
+)
 const doApplyFilter = (id: string, filter: string) => {
   // close filter dialog
   openFilterDialog.value = false
 
   displayIndeterminateProgressbar.value = true
+  if (long_running_filters.value.includes(filter)) {
+    isApplyingLongRunningFilter.value = true
+  }
+
   fetch(`/api/filter/${id}?filter=${filter}`, { method: 'PATCH' })
     .then(response => {
       if (!response.ok) {
@@ -258,6 +285,7 @@ const doApplyFilter = (id: string, filter: string) => {
     .catch(err => {
       console.error(err)
       displayIndeterminateProgressbar.value = false
+      isApplyingLongRunningFilter.value = false
     })
 }
 const doDeleteItem = (id: string) => {

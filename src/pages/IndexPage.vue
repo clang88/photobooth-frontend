@@ -11,9 +11,32 @@
     ></preview-stream>
 
     <!-- layer display processing spinner grid to show user computer working hard -->
-    <div v-if="stateStore.isStateProcessing" class="full-height full-width column justify-center content-center" style="position: absolute">
-      <q-spinner-grid size="20em" />
-    </div>
+    <transition name="fade">
+      <div
+        v-if="stateStore.isStateProcessing"
+        class="absolute-full flex flex-center"
+        style="z-index: 100; background: black"
+      >
+        <template v-if="stateStore.jobmodel.is_long_running_filter && (stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id)">
+          <q-img
+            loading="eager"
+            fit="contain"
+            class="absolute-full"
+            :src="`/api/processing/approval/${stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id}`"
+          />
+          <div
+            class="column items-center justify-center absolute-center q-pa-lg glass-effect rounded-borders text-white shadow-10"
+            style="backdrop-filter: blur(10px); background: rgba(0, 0, 0, 0.4); z-index: 10"
+          >
+            <q-spinner-dots size="4em" color="primary" class="q-mb-md" />
+            <div class="text-h5 text-weight-bold text-center">{{ $t('Filter is processing...') }}</div>
+          </div>
+        </template>
+        <template v-else>
+          <q-spinner-grid size="20em" />
+        </template>
+      </div>
+    </transition>
 
     <!-- layer display the countdown timer -->
     <div
@@ -35,14 +58,16 @@
     <div v-if="stateStore.isStateIdle" id="frontpage_text" v-html="configurationStore.configuration.uisettings.FRONTPAGE_TEXT"></div>
 
     <!-- dialog for approval -->
-    <div v-if="stateStore.isStateApproval && stateStore.jobmodel.approval_id">
-      <MediaItemApprovalViewer
-        :approval_id="stateStore.jobmodel.approval_id"
-        :number_captures_taken="stateStore.jobmodel.number_captures_taken"
-        :total_captures_to_take="stateStore.jobmodel.total_captures_to_take"
-      >
-      </MediaItemApprovalViewer>
-    </div>
+    <transition name="fade">
+      <div v-if="stateStore.isStateApproval && stateStore.jobmodel.approval_id">
+        <MediaItemApprovalViewer
+          :approval_id="stateStore.jobmodel.approval_id"
+          :number_captures_taken="stateStore.jobmodel.number_captures_taken"
+          :total_captures_to_take="stateStore.jobmodel.total_captures_to_take"
+        >
+        </MediaItemApprovalViewer>
+      </div>
+    </transition>
 
     <q-page-sticky position="bottom" class="q-mb-lg">
       <div v-if="stateStore.isStateIdle">
@@ -227,4 +252,12 @@ const stopRecordingVideo = () => {
 .action-button-admin-invisible
   opacity: 0.0
   cursor: default
+
+.fade-enter-active,
+.fade-leave-active
+  transition: opacity 0.5s ease
+
+.fade-enter-from,
+.fade-leave-to
+  opacity: 0
 </style>
