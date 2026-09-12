@@ -21,7 +21,7 @@
           <q-img
             loading="eager"
             fit="contain"
-            class="absolute-full"
+            style="height: 100%; width: 100%"
             :src="`/api/processing/approval/${stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id}`"
           />
           <div
