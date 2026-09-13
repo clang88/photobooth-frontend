@@ -269,9 +269,12 @@ const doApplyFilter = (id: string, filter: string) => {
   // close filter dialog
   openFilterDialog.value = false
 
-  displayIndeterminateProgressbar.value = true
   if (long_running_filters.value.includes(filter)) {
     isApplyingLongRunningFilter.value = true
+    displayIndeterminateProgressbar.value = false
+  } else {
+    isApplyingLongRunningFilter.value = false
+    displayIndeterminateProgressbar.value = true
   }
 
   fetch(`/api/filter/${id}?filter=${filter}`, { method: 'PATCH' })
