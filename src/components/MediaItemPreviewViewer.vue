@@ -4,6 +4,13 @@
       class="relative-position image-wrapper flex flex-center"
       :style="aspectRatio ? { aspectRatio: `${aspectRatio}` } : {}"
     >
+      <img
+        v-if="isApplyingLongRunningFilter"
+        :draggable="false"
+        class="preview-image absolute-top-left"
+        :src="`/media/preview/${item.id}?processed=false&${item.revision}`"
+      />
+
       <transition name="fade">
         <img
           :key="`${item.id}-${item.revision}`"
@@ -64,9 +71,17 @@ function onImageLoad(e: Event) {
 </script>
 
 <style scoped>
-.fade-enter-active,
+.fade-enter-active {
+  transition: opacity 1s ease;
+}
+
 .fade-leave-active {
   transition: opacity 1s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .fade-enter-from,

@@ -13,32 +13,40 @@
     <!-- layer display processing spinner grid to show user computer working hard -->
     <transition name="fade">
       <div
-        v-if="stateStore.isStateProcessing"
+        v-if="stateStore.isStateProcessing && (!stateStore.jobmodel.is_long_running_filter || (!stateStore.jobmodel.latest_capture_id && !stateStore.jobmodel.approval_id))"
         class="absolute-full flex flex-center overflow-hidden"
         style="z-index: 100; background: black"
       >
-        <template v-if="stateStore.jobmodel.is_long_running_filter && (stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id)">
-          <div
-            class="relative-position image-wrapper flex flex-center"
-            :style="actionAspectRatio ? { aspectRatio: `${actionAspectRatio}` } : {}"
-          >
-            <img
-              loading="eager"
-              class="preview-image"
-              :src="`/api/processing/approval/${stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id}`"
-              @load="onActionImgLoad"
-            />
-            <div class="rainbow-frame-overlay">
+        <q-spinner-grid size="20em" />
+      </div>
+    </transition>
+
+    <!-- long-running filter preview shown overlaying stream, persistent into approval transition -->
+    <transition name="fade">
+      <div
+        v-if="(stateStore.isStateProcessing || stateStore.isStateApproval) && stateStore.jobmodel.is_long_running_filter && (stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id)"
+        class="absolute-full flex flex-center overflow-hidden"
+        style="z-index: 90; background: black"
+      >
+        <div
+          class="relative-position image-wrapper flex flex-center"
+          :style="actionAspectRatio ? { aspectRatio: `${actionAspectRatio}` } : {}"
+        >
+          <img
+            loading="eager"
+            class="preview-image"
+            :src="`/api/processing/approval/${stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id}`"
+            @load="onActionImgLoad"
+          />
+          <transition name="fade">
+            <div v-if="stateStore.isStateProcessing" class="rainbow-frame-overlay">
               <div class="rainbow-badge row items-center q-px-md q-py-xs text-white shadow-10">
                 <q-spinner-dots size="1.6em" color="white" class="q-mr-sm" />
                 <div class="text-subtitle1 text-weight-medium">{{ $t('Filter is processing...') }}</div>
               </div>
             </div>
-          </div>
-        </template>
-        <template v-else>
-          <q-spinner-grid size="20em" />
-        </template>
+          </transition>
+        </div>
       </div>
     </transition>
 
