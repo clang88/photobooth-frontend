@@ -15,7 +15,7 @@
 
       <transition name="fade">
         <img
-          v-show="isLoaded"
+          v-show="isLoaded && !isApplyingLongRunningFilter"
           :key="`${item.id}-${item.revision}`"
           :draggable="false"
           class="preview-image"
