@@ -161,17 +161,7 @@ const props = defineProps<{
 }>()
 
 const checkJustPresentedLongRunningFilter = () => {
-  if (
-    props.itemPresenterMode &&
-    stateStore.jobmodel.is_long_running_filter &&
-    stateStore.jobmodel.present_mediaitem_id &&
-    stateStore.jobmodel.present_mediaitem_id === selectedMediaitemId.value
-  ) {
-    isApplyingLongRunningFilter.value = true
-    setTimeout(() => {
-      isApplyingLongRunningFilter.value = false
-    }, 100)
-  }
+  // Not used for action presenter transition
 }
 
 onBeforeMount(() => {

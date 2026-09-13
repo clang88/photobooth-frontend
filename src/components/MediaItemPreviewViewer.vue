@@ -15,6 +15,7 @@
 
       <transition name="fade">
         <img
+          v-show="isLoaded"
           :key="`${item.id}-${item.revision}`"
           :draggable="false"
           class="preview-image"
@@ -53,37 +54,39 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { components } from '@/dto/api'
 import { isVideo, isImage } from '@/util/media_is_type'
 
-defineProps<{
+const props = defineProps<{
   item: components['schemas']['MediaitemPublic']
   isApplyingLongRunningFilter?: boolean
 }>()
 
 const aspectRatio = ref<number | null>(null)
+const isLoaded = ref(false)
+
+watch(
+  () => [props.item.id, props.item.revision],
+  () => {
+    isLoaded.value = false
+  },
+  { immediate: true }
+)
 
 function onImageLoad(e: Event) {
   const target = e.target as HTMLImageElement
   if (target && target.naturalWidth && target.naturalHeight) {
     aspectRatio.value = target.naturalWidth / target.naturalHeight
   }
+  isLoaded.value = true
 }
 </script>
 
 <style scoped>
-.fade-enter-active {
-  transition: opacity 1s ease;
-}
-
+.fade-enter-active,
 .fade-leave-active {
-  transition: opacity 1s ease;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  transition: opacity 0.5s ease;
 }
 
 .fade-enter-from,
