@@ -118,6 +118,7 @@ import { useI18n } from 'vue-i18n'
 <script setup lang="ts">
 import type { TriggerSchema } from '@/types/trigger-schema'
 import { useMainStore } from '@/stores/main-store'
+import { useStateStore } from '@/stores/state-store'
 import { useConfigurationStore } from '@/stores/configuration-store'
 import { useMediacollectionStore } from '@/stores/mediacollection-store'
 import { ref, onBeforeMount, computed, onMounted, watch } from 'vue'
@@ -141,6 +142,7 @@ const $q = useQuasar()
 const route = useRoute('mediaviewer')
 const router = useRouter()
 const mainStore = useMainStore()
+const stateStore = useStateStore()
 const configurationStore = useConfigurationStore()
 const mediacollectionStore = useMediacollectionStore()
 const selectedMediaitemId = ref<string | null>(null)
@@ -158,13 +160,29 @@ const props = defineProps<{
   itemPresenterMode?: boolean
 }>()
 
+const checkJustPresentedLongRunningFilter = () => {
+  if (
+    props.itemPresenterMode &&
+    stateStore.jobmodel.is_long_running_filter &&
+    stateStore.jobmodel.present_mediaitem_id &&
+    stateStore.jobmodel.present_mediaitem_id === selectedMediaitemId.value
+  ) {
+    isApplyingLongRunningFilter.value = true
+    setTimeout(() => {
+      isApplyingLongRunningFilter.value = false
+    }, 100)
+  }
+}
+
 onBeforeMount(() => {
   selectedMediaitemId.value = route.params.id as string
   getAvailableFilter()
   getLongRunningFilters()
+  checkJustPresentedLongRunningFilter()
 })
 watch(route, to => {
   selectedMediaitemId.value = to.params.id as string
+  checkJustPresentedLongRunningFilter()
 })
 onMounted(() => {
   headercountdowntimer.value = props.startTimer

@@ -4,12 +4,14 @@
       class="relative-position image-wrapper flex flex-center"
       :style="aspectRatio ? { aspectRatio: `${aspectRatio}` } : {}"
     >
-      <img
-        v-if="isApplyingLongRunningFilter"
-        :draggable="false"
-        class="preview-image absolute-top-left"
-        :src="`/media/preview/${item.id}?processed=false&${item.revision}`"
-      />
+      <transition name="fade">
+        <img
+          v-if="isApplyingLongRunningFilter"
+          :draggable="false"
+          class="preview-image absolute-top-left"
+          :src="`/media/preview/${item.id}?processed=false&${item.revision}`"
+        />
+      </transition>
 
       <transition name="fade">
         <img
