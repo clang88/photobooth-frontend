@@ -14,22 +14,26 @@
     <transition name="fade">
       <div
         v-if="stateStore.isStateProcessing"
-        class="absolute-full flex flex-center"
+        class="absolute-full flex flex-center overflow-hidden"
         style="z-index: 100; background: black"
       >
         <template v-if="stateStore.jobmodel.is_long_running_filter && (stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id)">
-          <q-img
-            loading="eager"
-            fit="contain"
-            style="height: 100%; width: 100%"
-            :src="`/api/processing/approval/${stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id}`"
-          />
           <div
-            class="column items-center justify-center absolute-center q-pa-lg glass-effect rounded-borders text-white shadow-10"
-            style="backdrop-filter: blur(10px); background: rgba(0, 0, 0, 0.4); z-index: 10"
+            class="relative-position image-wrapper flex flex-center"
+            :style="actionAspectRatio ? { aspectRatio: `${actionAspectRatio}` } : {}"
           >
-            <q-spinner-dots size="4em" color="primary" class="q-mb-md" />
-            <div class="text-h5 text-weight-bold text-center">{{ $t('Filter is processing...') }}</div>
+            <img
+              loading="eager"
+              class="preview-image"
+              :src="`/api/processing/approval/${stateStore.jobmodel.latest_capture_id || stateStore.jobmodel.approval_id}`"
+              @load="onActionImgLoad"
+            />
+            <div class="rainbow-frame-overlay">
+              <div class="rainbow-badge row items-center q-px-md q-py-xs text-white shadow-10">
+                <q-spinner-dots size="1.6em" color="white" class="q-mr-sm" />
+                <div class="text-subtitle1 text-weight-medium">{{ $t('Filter is processing...') }}</div>
+              </div>
+            </div>
           </div>
         </template>
         <template v-else>
@@ -241,6 +245,15 @@ const invokeAction = (trigger: TriggerSchema) => {
   mainStore.lastAction = trigger // save last action so it can be started from itempresenter directly again.
   remoteProcedureCall(`/api/${trigger.action}/${trigger.config_index}`)
 }
+const actionAspectRatio = ref<number | null>(null)
+
+function onActionImgLoad(e: Event) {
+  const target = e.target as HTMLImageElement
+  if (target && target.naturalWidth && target.naturalHeight) {
+    actionAspectRatio.value = target.naturalWidth / target.naturalHeight
+  }
+}
+
 const stopRecordingVideo = () => {
   remoteProcedureCall('/api/processing/next')
 }
@@ -260,4 +273,51 @@ const stopRecordingVideo = () => {
 .fade-enter-from,
 .fade-leave-to
   opacity: 0
+
+.image-wrapper
+  position: relative
+  height: 100%
+  width: auto
+  max-width: 100%
+  max-height: 100%
+
+.preview-image
+  width: 100%
+  height: 100%
+  object-fit: contain
+  display: block
+
+.rainbow-frame-overlay
+  position: absolute
+  inset: 0
+  z-index: 10
+  pointer-events: none
+  box-sizing: border-box
+
+.rainbow-frame-overlay::before
+  content: ''
+  position: absolute
+  inset: 0
+  border: 4px solid transparent
+  border-image: linear-gradient(135deg, #ff0055, #ff5000, #ffcc00, #00ff66, #00ccff, #7000ff, #ff0055) 1
+  animation: rainbow-border 3s linear infinite
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 0 15px rgba(0, 204, 255, 0.4)
+
+.rainbow-badge
+  position: absolute
+  top: 16px
+  left: 50%
+  transform: translateX(-50%)
+  background: rgba(0, 0, 0, 0.65)
+  backdrop-filter: blur(12px)
+  -webkit-backdrop-filter: blur(12px)
+  border: 1px solid rgba(255, 255, 255, 0.2)
+  border-radius: 24px
+  white-space: nowrap
+
+@keyframes rainbow-border
+  0%
+    filter: hue-rotate(0deg)
+  100%
+    filter: hue-rotate(360deg)
 </style>
